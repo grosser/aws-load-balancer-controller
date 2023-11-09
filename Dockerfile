@@ -24,6 +24,7 @@ RUN --mount=type=bind,target=. \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} GO111MODULE=on \
     CGO_CPPFLAGS="-D_FORTIFY_SOURCE=2" \
     CGO_LDFLAGS="-Wl,-z,relro,-z,now" \
+    go mod edit -replace golang.org/x/net=golang.org/x/net@v0.17.0\
     go build -buildmode=pie -tags 'osusergo,netgo,static_build' -ldflags="-s -w -linkmode=external -extldflags '-static-pie' -X ${VERSION_PKG}.GitVersion=${GIT_VERSION} -X ${VERSION_PKG}.GitCommit=${GIT_COMMIT} -X ${VERSION_PKG}.BuildDate=${BUILD_DATE}" -mod=readonly -a -o /out/controller main.go
 
 FROM $BASE_IMAGE as bin-unix
