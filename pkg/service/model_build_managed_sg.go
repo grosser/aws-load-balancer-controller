@@ -54,7 +54,12 @@ func (t *defaultModelBuildTask) buildManagedSecurityGroupName(_ context.Context)
 	_, _ = uuidHash.Write([]byte(t.clusterName))
 	_, _ = uuidHash.Write([]byte(t.service.Name))
 	_, _ = uuidHash.Write([]byte(t.service.Namespace))
-	_, _ = uuidHash.Write([]byte(t.service.UID))
+	// allow adopting an existing load balancer by giving it an existing service UID to adopt from
+	if t.service.Annotations["lb-service-uid-override"] != "" {
+		_, _ = uuidHash.Write([]byte(t.service.Annotations["lb-service-uid-override"]))
+	} else {
+		_, _ = uuidHash.Write([]byte(t.service.UID))
+	}
 
 	uuid := hex.EncodeToString(uuidHash.Sum(nil))
 	sanitizedName := invalidSecurityGroupNamePtn.ReplaceAllString(t.service.Name, "")

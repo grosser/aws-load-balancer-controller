@@ -190,7 +190,12 @@ func (t *defaultModelBuildTask) buildTargetGroupName(_ context.Context, svcPort 
 	}
 	uuidHash := sha256.New()
 	_, _ = uuidHash.Write([]byte(t.clusterName))
-	_, _ = uuidHash.Write([]byte(t.service.UID))
+	// allow adopting an existing load balancer by giving it an existing service UID to adopt from
+	if t.service.Annotations["lb-service-uid-override"] != "" {
+		_, _ = uuidHash.Write([]byte(t.service.Annotations["lb-service-uid-override"]))
+	} else {
+		_, _ = uuidHash.Write([]byte(t.service.UID))
+	}
 	_, _ = uuidHash.Write([]byte(strconv.Itoa(int(tgPort))))
 	_, _ = uuidHash.Write([]byte(svcPort.String()))
 	_, _ = uuidHash.Write([]byte(targetType))
